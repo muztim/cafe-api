@@ -1,15 +1,18 @@
 from flask import Flask, jsonify, render_template, request
 from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy.sql.expression import func, select
+from random import randint, choice
+
 
 app = Flask(__name__)
 
-##Connect to Database
+# Connect to Database
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///cafes.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 
 
-##Cafe TABLE Configuration
+# Cafe TABLE Configuration
 class Cafe(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(250), unique=True, nullable=False)
@@ -27,15 +30,26 @@ class Cafe(db.Model):
 @app.route("/")
 def home():
     return render_template("index.html")
-    
 
-## HTTP GET - Read Record
 
-## HTTP POST - Create Record
+@app.route('/random')
+def get_random_cafe():
+    # return random record object from database using built functions
+    random_cafe = db.session.query(Cafe).order_by(func.random()).first()
+    # cafes = choice(db.session.query(Cafe).all())  # Does the same thing with python syntax
+    cafe_dictionary = random_cafe.__dict__
+    del cafe_dictionary["_sa_instance_state"]
+    print(cafe_dictionary)
+    return jsonify(cafe_dictionary)
 
-## HTTP PUT/PATCH - Update Record
 
-## HTTP DELETE - Delete Record
+# HTTP GET - Read Record
+
+# HTTP POST - Create Record
+
+# HTTP PUT/PATCH - Update Record
+
+# HTTP DELETE - Delete Record
 
 
 if __name__ == '__main__':
